@@ -34,6 +34,10 @@ var params = {
   },
 };
 
+/*
+Get the events by date for the particular user
+date is passed as params in route in milliseconds
+*/
 function getEventsByUser() {
   return async (req, res) => {
     try {
@@ -59,6 +63,10 @@ function getEventsByUser() {
   };
 }
 
+/*
+Get the events by owner id
+ownerId is passed as params in route
+*/
 function getEventsByOwner() {
   return async (req, res) => {
     try {
@@ -81,6 +89,10 @@ function getEventsByOwner() {
   };
 }
 
+/*
+Get the events by event id
+eventId is passed as params in route
+*/
 function getEventsByEventId() {
   return async (req, res) => {
     try {
@@ -107,6 +119,11 @@ function getEventsByEventId() {
     }
   };
 }
+
+/*
+Get the time slots for the particular event and date
+eventId and date is passed as params in route
+*/
 function getEventsByTimeSlots() {
   return async (req, res) => {
     try {
@@ -173,7 +190,9 @@ function getEventsByTimeSlots() {
     }
   };
 }
-
+/*
+Add the event done by the owner
+*/
 function addEvent() {
   return async (req, res) => {
     try {
@@ -185,24 +204,9 @@ function addEvent() {
       }
       let event = req.body;
       event.id = generateID();
-      let coveredMonths = ``;
-      let flag = false;
-      let currentDay = moment(req.body.startDate);
-      let result = await toCalculateMonthsCovered(
-        req,
-        res,
-        coveredMonths,
-        flag,
-        currentDay
-      );
-      if (!result) {
-        return;
-      }
-      coveredMonths = result;
-      event.coveredMonths = coveredMonths;
       event.createdAt = moment().unix();
       if (await dynamodb.createTableIfNotExists("Events", params)) {
-        let response = await dynamodb.addItem("Events", event);
+        await dynamodb.addItem("Events", event);
         res.status(200).json({});
         return;
       }
@@ -221,31 +225,17 @@ function addEvent() {
     }
   };
 }
-
+/*
+Update the event done by the owner by the keys of event id and owner id
+*/
 function updateEvent() {
   return async (req, res) => {
     try {
-      let present = false;
       let { id, ownerId, ...data } = req.body;
       let key = { id: id, ownerId: ownerId };
-      var coveredMonths = ``;
-      let flag = false;
-      let currentDay = moment(req.body.startDate);
-      let result = await toCalculateMonthsCovered(
-        req,
-        res,
-        coveredMonths,
-        flag,
-        currentDay
-      );
-      if (result.length === 0) {
-        return;
-      }
-      coveredMonths = result;
       flag = result.flag;
-      data.coveredMonths = coveredMonths;
       data.updatedAt = moment().unix();
-      let response = await dynamodb.updateItem(
+      await dynamodb.updateItem(
         "Events",
         key,
         data,
@@ -260,6 +250,9 @@ function updateEvent() {
   };
 }
 
+/*
+Delete the event done by the owner by the event id
+*/
 function deleteEvent() {
   return async (req, res) => {
     try {
@@ -281,32 +274,9 @@ function deleteEvent() {
   };
 }
 
-async function toCalculateMonthsCovered(
-  req,
-  res,
-  coveredMonths,
-  flag,
-  currentDay
-) {
-  while (currentDay.isSameOrBefore(moment(req.body.endDate))) {
-    if (!coveredMonths.includes(currentDay.format("YYYY-MM"))) {
-      coveredMonths += `${currentDay.format("YYYY-MM")},`;
-    }
-    if (
-      flag ||
-      req.body.selectWeek.hasOwnProperty(currentDay.format("ddd").toLowerCase())
-    ) {
-      flag = true;
-    }
-    currentDay.add(1, "days");
-  }
-  if (!flag) {
-    res.status(400).json("Days can't be selected for the given week range");
-    return;
-  }
-  return coveredMonths;
-}
-
+/*
+Get the events by event id and owner id
+*/
 
 async function getEventsByIdAndOwner(id, ownerId) {
   let keyConditionExpression = `id = :value1 AND ownerId = :value2`;

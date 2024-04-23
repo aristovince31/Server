@@ -1,5 +1,10 @@
 const joi = require('joi');
 
+/**
+ * Validate the user object
+ * @param {object} user user object
+ * @returns {boolean} true if valid, false if invalid
+ */
 function validateUser(user) {
     const schema = joi.object({
         firstName: joi.string().min(3).required(),
@@ -21,6 +26,11 @@ function validateUser(user) {
     return result;
 }
 
+/**
+ * Validate the login object
+ * @param {object} user login object
+ * @returns {boolean} true if valid, false if invalid
+*/
 function validateLogin(user) {
     const schema = joi.object({
         email: joi.string().email().required(),
@@ -36,6 +46,11 @@ function validateLogin(user) {
     return result;
 }
 
+/**
+ * Validate the event object
+ * @param {object} Event event object
+ * @returns {boolean} true if valid, false if invalid
+*/
 function validateEvent(Event) {
     const daySchema = joi.object({
         startTime: joi.string().pattern(new RegExp(/^(0?[0-9]|1[0-9]|2[0-3]):[0-5]?[0-9]$/)).required(),
@@ -71,6 +86,11 @@ function validateEvent(Event) {
     return result;
 }
 
+/**
+ * Validate the appointment object
+ * @param {object} appointment appointment object
+ * @returns {boolean} true if valid, false if invalid
+*/
 function validateAppointment(appointment) {
     const schema = joi.object({
         eventId: joi.string().required(),
@@ -78,7 +98,8 @@ function validateAppointment(appointment) {
         ownerId : joi.string().required(),
         appointmentDate : joi.date().required(),
         personName : joi.string().required(),
-        appointmentId: joi.string().required(),
+        appointmentId: joi.string(),
+        eventName: joi.string(),
         personPhone : joi.string().pattern(new RegExp(/^[0-9]{10}$/)).required(),
         timeSlot : joi.string().pattern(new RegExp(/^(0?[0-9]|1[0-9]|2[0-3]):[0-5]?[0-9]-((0?[0-9]|1[0-9]|2[0-3]):[0-5]?[0-9])$/)).required()
     }).unknown(false).messages({
@@ -90,6 +111,11 @@ function validateAppointment(appointment) {
     return result;
 }
 
+/**
+ * Validate the email object
+ * @param {object} id email object
+ * @returns {boolean} true if valid, false if invalid
+*/
 function validateEmail(id) {
     const schema = joi.object({
         email: joi.string().email().required(),
@@ -101,6 +127,12 @@ function validateEmail(id) {
     const result = schema.validate(id);
     return result;
 }
+
+/**
+ * Validate the forgot password object
+ * @param {object} user forgot password object
+ * @returns {boolean} true if valid, false if invalid
+*/
 function validateForgotPassword(user) {
     const schema = joi.object({
         email: joi.string().email().required(),
@@ -112,6 +144,12 @@ function validateForgotPassword(user) {
     const result = schema.validate(user);
     return result;
 }
+
+/**
+ * Validate the reset password object
+ * @param {object} user reset password object
+ * @returns {boolean} true if valid, false if invalid
+*/
 function validateResetPassword(user) {
     const schema = joi.object({
         email : joi.string().email().required(),

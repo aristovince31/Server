@@ -3,6 +3,11 @@ const nodemailer = require('nodemailer');
 const {google} = require('googleapis');
 const OAuth2 = google.auth.OAuth2;
 
+/**
+ * Function to create a transporter object for sending emails
+ * @returns {Promise} - Returns a promise that resolves to a transporter object
+ */
+
 async function createTransport()
 {
     const oauth2Client = new OAuth2(
@@ -39,7 +44,12 @@ async function createTransport()
     return transporter;
 }
 
-
+/**
+ * Function to send a mail
+ * @param {string} email email to send otp
+ * @param {string} token credentials required to send email
+ * @returns 
+ */
 const sendMail = async (email, token) => {
     const mailOptions = {
         from: process.env.EMAIL,

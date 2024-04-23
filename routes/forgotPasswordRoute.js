@@ -13,6 +13,10 @@ const rateLimiter = rateLimit({
     message: JSON.stringify({message: "Too many requests, please try again later."})
 });
 
+/*
+Get the user by email and validate the password in the server
+Grant the login to the application if the user is valid
+*/
 router.get("/email/:email", rateLimiter, async (req, res) => {
     try
     {
@@ -31,6 +35,10 @@ router.get("/email/:email", rateLimiter, async (req, res) => {
     }
 });
 
+/*
+Get the user by email and validate the password in the server
+Grant the login to the application if the user is valid
+*/
 router.post("/",async (req, res) => {
     try
     {

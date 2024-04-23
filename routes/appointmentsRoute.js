@@ -6,8 +6,6 @@ const route = express.Router();
 
 route.get("/date/:userId/:date", getAppointmentByDate());
 
-//route.get("/month/:eventId/:month", getAppointmentByMonth());
-
 route.post("/", addAppointment());
 
 route.put("/", updateAppointment());

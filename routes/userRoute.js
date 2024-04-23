@@ -3,6 +3,7 @@ const {login, addUser, updateUser, deleteUser} = require('../controllers/userCon
 
 const route = express.Router();
 
+
 route.get("/", (req, res) => {
     if (req.user) {
         res.status(200).json(req.user); 

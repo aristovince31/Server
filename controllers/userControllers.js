@@ -27,6 +27,10 @@ var params = {
   },
 };
 
+/*
+Get the user by email and validate the password in the server
+Grant the login to the application if the user is valid
+*/
 function login() {
   return async (req, res) => {
     try {
@@ -60,7 +64,6 @@ function login() {
           if (result) {
             delete response[0].password;
             delete response[0].lastName;
-            //res.cookie("uuid",createSign({id: response[0].id,loginType: response[0].loginType, firstName: response[0].firstName}), {httpOnly: true, secure: false, maxAge: 600000, sameSite: 'strict'});
             res.status(200).json(response[0]);
           } else {
             res.status(401).json({});
@@ -74,6 +77,10 @@ function login() {
   };
 }
 
+/*
+Add the user to the database for new sign up on the page.
+It will check if the user already exists or not and add user to the database.
+*/
 function addUser() {
   return async (req, res) => {
     try {
@@ -102,7 +109,7 @@ function addUser() {
         req.body.password = await bcrypt.hash(req.body.password, 11);
         delete req.body.confirmPassword;
         req.body.createdAt = moment().unix();  
-        let response = await dynamodb.addItem("Users", req.body);
+        await dynamodb.addItem("Users", req.body);
         res.status(200).json({});
       }
     } catch (error) {
@@ -111,6 +118,10 @@ function addUser() {
     }
   };
 }
+
+/*
+Update the user details in the database
+*/
 
 function updateUser() {
   return async (req, res) => {
@@ -123,7 +134,7 @@ function updateUser() {
       let {email, password, ...data} = req.body;
       req.body.password = await bcrypt.hash(req.body.password, 11);
       delete req.body.confirmPassword;
-      const response = await dynamodb.updateItem("Users", {email: email}, data, "attribute_exists(email)");
+      await dynamodb.updateItem("Users", {email: email}, data, "attribute_exists(email)");
       res.clearCookie("uuid");
       res.status(200).json({});
     } catch (error) {
@@ -133,6 +144,13 @@ function updateUser() {
   };
 }
 
+/**
+ * Update the password of the user
+ * @param {object} res  response object
+ * @param {string} email  email of the user
+ * @param {string} password  new password
+ * @param {Number} oneTimePassword  OTP sent to the user
+ */
 async function updatePassword(res, email, password, oneTimePassword) {
   try {
     if (otp !== Number(oneTimePassword)) {
@@ -164,6 +182,10 @@ async function updatePassword(res, email, password, oneTimePassword) {
     return res.status(500).json({});
   }
 }
+/**
+ * Check if the user exists and send the OTP to the user
+ * @param {string} email email of the user
+ */
 
 async function forgotPassword(email) {
   try {
@@ -192,6 +214,9 @@ async function forgotPassword(email) {
     return error;
   }
 }
+/*
+Delete the user from the database
+*/
 function deleteUser() {
   return async (req, res) => {
     try {

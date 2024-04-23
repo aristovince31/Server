@@ -1,7 +1,11 @@
 const jwt = require('jsonwebtoken');
 const process = require('process');
 
-
+/**
+ * Create a sign for the user
+ * @param {object} user - user object
+ * @returns {string} token
+ */
 function createSign(user)
 {
     let payload = {
@@ -13,6 +17,11 @@ function createSign(user)
     return  jwt.sign(payload, process.env.SECRET_KEY, {expiresIn: '24h'});
 }
 
+/**
+ * Verify the sign for the user
+ * @param {string} token - token
+ * @returns {object} user
+ */
 function verifySign(token)
 {
     try

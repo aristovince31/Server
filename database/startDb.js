@@ -3,6 +3,9 @@ const dynamoDBLocalPath = '../DynamoDb/DynamoDBLocal.jar';
 
 const port = 8000;
 
+/*
+Start the DynamoDBLocal server
+*/
 function start()
 {
     const dynamoDBProcess = spawn(

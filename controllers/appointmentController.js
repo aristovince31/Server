@@ -35,6 +35,10 @@ var params = {
   },
 };
 
+/*
+Get the appointments by date for the particular user
+date is passed as params in route in milliseconds
+*/
 function getAppointmentByDate() {
   return async (req, res) => {
     try {
@@ -48,7 +52,7 @@ function getAppointmentByDate() {
         "Appointments",
         KeyConditionExpression,
         ExpressionAttributeValues,
-        "appointmentId, eventId, timeSlot, personName, personPhone, ownerId",
+        "appointmentId, eventId, timeSlot, personName, personPhone, ownerId, eventName",
         FilterExpression
       );
       res.status(200).json(response);
@@ -58,40 +62,11 @@ function getAppointmentByDate() {
     }
   };
 }
-
-// function getAppointmentByMonth() {
-//   return async (req, res) => {
-//     try {
-//       let startDate = moment(req.params.month).startOf("month").valueOf();
-//       let endDate = moment(req.params.month).endOf("month").valueOf();
-//       let FilterExpression = `:monthStart <= appointmentDate AND :monthEnd >= appointmentDate AND contains(combinedIds, :value)`;
-//       let ExpressionAttributeValues = {
-//         ":monthStart": startDate,
-//         ":monthEnd": endDate,
-//         ":value": req.params.eventId,
-//       };
-//       let response = await dynamodb.scanItems(
-//         "Appointments",
-//         FilterExpression,
-//         ExpressionAttributeValues,
-//         "appointmentDate"
-//       );
-//       let appointmentDates = [];
-//       response.forEach((element) => {
-//         if (
-//           !appointmentDates.some((date) => date === element.appointmentDate)
-//         ) {
-//           appointmentDates.push(element.appointmentDate);
-//         }
-//       });
-//       res.status(200).json(appointmentDates);
-//     } catch (error) {
-//       console.error("Error getting item:", error);
-//       res.status(500).json({});
-//     }
-//   };
-// }
-
+/**
+Get the appointments by events and date
+@param {string} id - event id 
+@param {string} appointmentDate - appointment date in milliseconds
+**/
 async function getAppointmentByEventsAndDate(id, appointmentDate) {
   try {
     let KeyConditionExpression = `appointmentDate = :date`;
@@ -117,6 +92,9 @@ async function getAppointmentByEventsAndDate(id, appointmentDate) {
     return {};
   }
 }
+/*
+Add the appointment for the particular event for user
+*/
 function addAppointment() {
   return async (req, res) => {
     try {
@@ -137,7 +115,9 @@ function addAppointment() {
     }
   };
 }
-
+/*
+Update the appointment for the particular event for user
+*/
 function updateAppointment() {
   return async (req, res) => {
     try {
@@ -148,7 +128,7 @@ function updateAppointment() {
       delete data.userId;
       delete data.eventId;
       data.updatedAt = moment().unix();
-      const response = await dynamodb.updateItem(
+      await dynamodb.updateItem(
         "Appointments",
         {
           appointmentDate: appointmentDate,
@@ -164,7 +144,9 @@ function updateAppointment() {
     }
   };
 }
-
+/*
+Delete the appointment for the particular event for user
+*/
 function deleteAppointment() {
   return async (req, res) => {
     try {
@@ -181,7 +163,12 @@ function deleteAppointment() {
     }
   };
 }
-
+/**
+ * To validate the appointment details
+ * @param {object} req request object
+ * @param {object} res response object
+ * @returns {boolean} true if valid, false if invalid
+ */
 async function validateAppointmentDetails(req, res) {
   let validate = validateAppointment(req.body);
   if (validate.error) {
