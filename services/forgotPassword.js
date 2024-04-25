@@ -60,8 +60,7 @@ const sendMail = async (email, token) => {
     }
     try {
         const transporter = await createTransport();
-        console.log(transporter);
-        console.log(await transporter.sendMail(mailOptions));
+        await transporter.sendMail(mailOptions);
         return true;
     } catch (error) {
         return false;

@@ -3,6 +3,7 @@ const {
   generateID,
   toCheckTimePresentBetweenTwoTimeSlots,
 } = require("../utils/index");
+const {week} = require("../utils/index")
 const { validateEvent } = require("../utils/validation");
 const moment = require("moment");
 
@@ -210,13 +211,33 @@ function addEvent() {
         res.status(200).json({});
         return;
       }
+      if(moment(req.body.endDate).isBefore(moment(req.body.startDate)))
+      {
+        present = true;
+      }
+      currentDate = moment(req.body.startDate)
+      coveredWeek = [];
+      while(currentDate.isSameOrBefore(moment(req.body.endDate)))
+      {
+        if(!coveredWeek.includes(currentDate.day()))
+        {
+          coveredWeek.push(currentDate.day());
+        }
+        currentDate.add(1, 'days');
+      }
+      Object.keys(req.body.selectWeek).map((x) => week.indexOf(x)).forEach((x) => {
+        if(!coveredWeek.includes(x))
+        {
+          present = true;
+        }
+      })
       if (!present) {
-        let response = await dynamodb.addItem("Events", event);
+        await dynamodb.addItem("Events", event);
         res.status(200).json(req.body.id);
       } else {
         res
           .status(400)
-          .json("Availability already exists for the given date and time");
+          .json("Not Acceptable Data");
         return;
       }
     } catch (error) {
@@ -233,16 +254,43 @@ function updateEvent() {
     try {
       let { id, ownerId, ...data } = req.body;
       let key = { id: id, ownerId: ownerId };
-      flag = result.flag;
       data.updatedAt = moment().unix();
-      await dynamodb.updateItem(
-        "Events",
-        key,
-        data,
-        "attribute_exists(id) AND attribute_exists(ownerId)"
-      );
-      res.status(200).json({});
-      return;
+      present = false;
+      if(moment(req.body.endDate).isBefore(moment(req.body.startDate)))
+      {
+        present = true;
+      }
+      currentDate = moment(req.body.startDate)
+      coveredWeek = [];
+      while(currentDate.isSameOrBefore(moment(req.body.endDate)))
+      {
+        if(!coveredWeek.includes(currentDate.day()))
+        {
+          coveredWeek.push(currentDate.day());
+        }
+        currentDate.add(1, 'days');
+      }
+      Object.keys(req.body.selectWeek).map((x) => week.indexOf(x)).forEach((x) => {
+        if(!coveredWeek.includes(x))
+        {
+          present = true;
+        }
+      })
+      if(!present)
+      {
+        await dynamodb.updateItem(
+          "Events",
+          key,
+          data,
+          "attribute_exists(id) AND attribute_exists(ownerId)"
+        );
+        res.status(200).json(req.body.id);
+        return;
+      }
+      else
+      {
+        res.status(400).json("Not Acceptable Data");
+      }
     } catch (error) {
       console.error("Error adding item:", error);
       res.status(500).json({});
@@ -257,7 +305,6 @@ function deleteEvent() {
   return async (req, res) => {
     try {
       let response = await dynamodb.scanItems("Appointments", "eventId = :value", { ":value": req.body.id }, "eventId");
-      console.log(response);
       if(response.length > 0) {
         res.status(400).json("Event is associated with appointments");
         return;

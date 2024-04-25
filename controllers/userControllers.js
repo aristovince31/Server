@@ -84,7 +84,6 @@ It will check if the user already exists or not and add user to the database.
 function addUser() {
   return async (req, res) => {
     try {
-      console.log(req.body);
       let validate = validateUser(req.body);
       if (validate.error) {
         res.status(400).json(validate.error.details[0].message);

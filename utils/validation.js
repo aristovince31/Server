@@ -64,7 +64,7 @@ function validateEvent(Event) {
     });
     const schema = joi.object({
         ownerId : joi.string().required(),
-        eventName : joi.string().alphanum().required(),
+        eventName : joi.string().required(),
         startDate : joi.date().required(),
         endDate : joi.date().required(),          
         slotDuration : joi.string().pattern(new RegExp(/^(0?[0-9]|1[0-9]|2[0-3]):[0-5]?[0-9]$/)).required(),
